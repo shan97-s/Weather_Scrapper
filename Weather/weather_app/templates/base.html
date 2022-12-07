@@ -28,6 +28,7 @@
             {% if user.is_authenticated %}
               <li><a href="{% url 'about' %}">About</a></li>
               <li><a href="/display">Check</a></li>
+              <li><a href="/maps">Maps</a></li>
               <li><a href='https://www.google.com/search?q=+weather+Manama'>Forecast</a></li> 
               <li><a href="{% url 'forecaste' %}">Form for Forecast</a></li>          
               <li><a href="{% url 'logout' %}">Log Out</a></li>
@@ -57,7 +58,7 @@
     {% endblock %}
   </main>
   <footer class="page-footer">
-    <div class="right">All Rights Reserved, &copy; 2019 Cat Collector &nbsp;</div>
+    <div class="right">All Rights Reserved, &copy; 2022 Weather Portal &nbsp;</div>
   </footer>
 </body>
 </html>

@@ -2,7 +2,7 @@ body {
   display: flex;
   min-height: 100vh;
   flex-direction: column;
-  background-color: greenyellow;
+  background-color: rgb(42, 226, 233);
 }
 
 main {
@@ -15,7 +15,11 @@ footer.page-footer {
 }
 
 .nav-wrapper {
-  background-color: greenyellow;
+  background-color:rgb(22, 145, 216);
+}
+.page-footer{
+  background-color:rgb(22, 145, 216);
+  text-align:left;
 }
 
 td {

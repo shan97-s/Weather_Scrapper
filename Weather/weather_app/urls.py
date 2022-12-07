@@ -7,7 +7,7 @@ import requests
 city="Manama"
 urlpatterns = [
   path('', views.home, name='home'),
- 
+  path('maps/', views.Map, name='map'),
   path('display/f', views.forecaste, name='forecaste'),
   path('display/', views.display, name='display'),
   path('display/', views.RecordCrt.as_view(), name='create'),

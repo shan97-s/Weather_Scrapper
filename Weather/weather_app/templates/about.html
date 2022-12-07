@@ -5,13 +5,12 @@
 <hr />
 <p>Forecast the weather!</p><br/>
 <a href="https://www.msn.com/en-us/weather/maps?in-Vladivostok/animation=0&type=radar">Open Map</a>
-<div style="overflow:auto;display:inline-block;height:300px;width:500px;background-color: rgb(3, 13, 105);scroll-behavior:smooth;">
+<div style="overflow:auto;display:inline-block;height:300px;width:500px;background-color: rgb(2, 19, 73);scroll-behavior:smooth;">
 {% for x in temperature%}
 {% for z in  x.list%}
 <tr >
     <div class="box" style="display:inline-flex;color:white;margin:3px;width:98%;height:50%;line-height:normal;background-color:rgb(60, 80, 255);border:2px solid whitesmoke;border-radius: 10px;box-shadow: 1px 1px 1px 1px turquoise, -1px -1px 1px 1px turquoise">
-        <h5>{{ z.c}}</h5> <br/><div style="margin-left:55%;text-align: right;font-weight: bold;"> <td>Temperature {{ z.temp}}</td> <br/> <td>{{z.sky}}</td> <br/> <td>{{z.sky}}</td> <br/> <td>{{z.t}}</td><br/>{{n}}</div></div>>
-    
+        <h5>{{ z.c}}</h5> <br/><div style="margin-left:51%;text-align: right;font-weight: bold;"> <td>Temperature {{ z.temp}}</td> <br/> <td>{{z.sky}}</td>  <br/> <td>{{z.t}}</td><br/>{{n}}</div></div>
 </tr>
 {% endfor %}
 {% endfor %}

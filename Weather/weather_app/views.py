@@ -4,6 +4,8 @@ import requests
 from selenium import webdriver
 from bs4 import BeautifulSoup
 import pandas as pd
+import folium
+import geopandas
 #user section
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
@@ -65,14 +67,19 @@ def about(request):
 def home(request):
   return render(request, 'home.html')
 
+def Map(request):
+  return render(request, 'meat.html')
+
+
 def base(request):
   return render(request, 'base.html')
 
 def test(request):
     url = 'https://www.msn.com/en-us/weather/maps?in-Vladivostok/animation=0&type=radar'
     html = requests.get(url).content
+    # di=htmlq.json()
     soup = BeautifulSoup(html, 'html.parser')
-    divf = soup.find('div', attrs={'id': 'root'}).text
+    divf = soup.find('div', attrs={'id': 'root'})
     return HttpResponse(f'<h1>Welcome to dashboard</h1>{divf}')
 
 #   driver = webdriver.Chrome("/usr/lib/chromium-browser/chromedriver")
@@ -83,13 +90,17 @@ def test(request):
 array=[]
 returns=array
 city=''
+cityarr=[]
+citytemp=[]
 def forecaste(request):
    city=request.POST.get('city')
-   n = request.POST.get('city')
+  #  n = request.POST.get('city')
+   cityarr.append(city)
    url=f'https://www.google.com/search?hl=en&q=+weather+{city}'
    html=requests.get(url).content
    soup=BeautifulSoup(html, 'html.parser')
    temp = soup.find('div', attrs={'class': 'BNeawe iBp4i AP7Wnd'}).text
+   citytemp.append(temp)
    star = soup.find('div', attrs={'class': 'BNeawe tAd8D AP7Wnd'}).text
    listdiv = soup.findAll('div', attrs={'class': 'BNeawe s3v9rd AP7Wnd'})
    strd = listdiv[5].text
@@ -102,9 +113,44 @@ def forecaste(request):
    context={'list':[{'c':city,'temp':temp,'sky':sky,'t':time}]}
    array.append(context)
    returns=array
+
+   print(cityarr)
+   df = pd.DataFrame({"Country" : cityarr, 
+                   "Temperature" : 20
+                  #  "col3" : ['A A']
+                   })
+  # table = df[0]
+   world = geopandas.read_file(geopandas.datasets.get_path('naturalearth_lowres'))
+   df.columns = df.columns.str.replace(' ', '')
+  # df.astype(String)
+   table = world.merge(df, how="left", left_on=['name'], right_on=['Country'])
+
+   table = table.dropna(subset=['Temperature'])
+   my_map = folium.Map(location=[19.433368, -99.137400],zoom_start=9)
+# Add the data
+   my_map = folium.Map()
+
+   folium.Choropleth(
+    geo_data=table,
+    name='choropleth',
+    data=table,
+    columns=["Country","Temperature"],
+    key_on='feature.properties.name',
+    fill_color='OrRd',
+    fill_opacity=0.7,
+    line_opacity=0.2,
+    legend_name='Meat consumption in kg/person'
+   ).add_to(my_map)
+   my_map.save('meat.html')
+  
+   print(df)
+   print(table)
+   print(my_map) 
+   
 #    return render(request,'about.html',{
 #      'temperature':returns
 #    })
+  
    return redirect('create')
 
 
@@ -131,9 +177,42 @@ class RecordCrt(LoginRequiredMixin, CreateView):
     #         'city': forms.CharField(attrs={'placeholder': "Search Content..."})
     #     }
        return super().form_valid(form)
-    def send(request):
-      p = Records(city='Berkeley', temp='20')
-      p.save()
+#     def send(request):
+#       p = Records(city='Berkeley', temp='20')
+#       p.save()
+#       print(cityarr)
+#       df = pd.DataFrame({"Country" : cityarr, 
+#                    "Temperature" : 20
+#                   #  "col3" : ['A A']
+#                    })
+#   # table = df[0]
+#       world = geopandas.read_file(geopandas.datasets.get_path('naturalearth_lowres'))
+#       df.columns = df.columns.str.replace(' ', '')
+#   # df.astype(String)
+#       table = world.merge(df, how="left", left_on=['name'], right_on=['Country'])
+
+#       table = table.dropna(subset=['Temperature'])
+#       my_map = folium.Map(location=[19.433368, -99.137400],zoom_start=9)
+# # Add the data
+#       my_map = folium.Map()
+
+#       folium.Choropleth(
+#         geo_data=table,
+#         name='choropleth',
+#         data=table,
+#         columns=["Country","Temperature"],
+#         key_on='feature.properties.name',
+#         fill_color='OrRd',
+#         fill_opacity=0.7,
+#         line_opacity=0.2,
+#         legend_name='Meat consumption in kg/person'
+#       ).add_to(my_map)
+#       my_map.save('meat.html')
+  
+#       print(df)
+#       print(table)
+#       print(my_map) 
+  # print(world)
     #    return redirect('display')
 
 RecordForm=modelform_factory(Records,fields=('city','temp'))
@@ -143,7 +222,47 @@ name=""
 def display(request):
   
   name = request.POST.get('city')
-    
+  
+# The URL we will read our data from
+  url = 'https://en.wikipedia.org/wiki/List_of_countries_by_meat_consumption'
+  c_url = requests.get(url)
+
+# read_html returns a list of tables from the URL
+  # tables = pd.read_html(c_url)
+# The data is in the first table - this changes from time to time - wikipedia is updated all the time.
+#   print(cityarr)
+#   df = pd.DataFrame({"Country" : cityarr, 
+#                    "Temperature" : 20
+#                   #  "col3" : ['A A']
+#                    })
+#   # table = df[0]
+#   world = geopandas.read_file(geopandas.datasets.get_path('naturalearth_lowres'))
+#   df.columns = df.columns.str.replace(' ', '')
+#   # df.astype(String)
+#   table = world.merge(df, how="left", left_on=['name'], right_on=['Country'])
+
+#   table = table.dropna(subset=['Temperature'])
+#   my_map = folium.Map(location=[19.433368, -99.137400],zoom_start=9)
+# # Add the data
+#   my_map = folium.Map()
+
+#   folium.Choropleth(
+#     geo_data=table,
+#     name='choropleth',
+#     data=table,
+#     columns=["Country","Temperature"],
+#     key_on='feature.properties.name',
+#     fill_color='OrRd',
+#     fill_opacity=0.7,
+#     line_opacity=0.2,
+#     legend_name='Meat consumption in kg/person'
+#   ).add_to(my_map)
+#   my_map.save('meat.html')
+  
+#   print(df)
+#   print(table)
+#   print(my_map) 
+  # print(world) 
 
    
   
