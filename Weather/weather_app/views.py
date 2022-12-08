@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 import pandas as pd
 import folium
 import geopandas
+from requests.adapters import HTTPAdapter, Retry
 #user section
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
@@ -68,7 +69,7 @@ def home(request):
   return render(request, 'home.html')
 
 def Map(request):
-  return render(request, 'meat.html')
+  return render(request, 'map.html')
 
 
 def base(request):
@@ -92,15 +93,24 @@ returns=array
 city=''
 cityarr=[]
 citytemp=[]
+k=[0]
 def forecaste(request):
    city=request.POST.get('city')
   #  n = request.POST.get('city')
    cityarr.append(city)
    url=f'https://www.google.com/search?hl=en&q=+weather+{city}'
-   html=requests.get(url).content
+   session = requests.Session()
+   retry = Retry(connect=3, backoff_factor=0.5)
+   adapter = HTTPAdapter(max_retries=retry)
+   session.mount('http://', adapter)
+   session.mount('https://', adapter)
+
+    
+   response = session.get(url).content
+   html=response
    soup=BeautifulSoup(html, 'html.parser')
    temp = soup.find('div', attrs={'class': 'BNeawe iBp4i AP7Wnd'}).text
-   citytemp.append(temp)
+   
    star = soup.find('div', attrs={'class': 'BNeawe tAd8D AP7Wnd'}).text
    listdiv = soup.findAll('div', attrs={'class': 'BNeawe s3v9rd AP7Wnd'})
    strd = listdiv[5].text
@@ -115,18 +125,35 @@ def forecaste(request):
    returns=array
 
    print(cityarr)
+   print(temp)
+   t=temp.split('°C')
+   print(t)
+   
+   m=t[0]
+   m=float(m)
+   k.append(m)
+   
+   print(k)
+   print(f'float {m}')
+   citytemp.append(m)
+   print(citytemp)
    df = pd.DataFrame({"Country" : cityarr, 
-                   "Temperature" : 20
+                   "Temperature" : citytemp
                   #  "col3" : ['A A']
                    })
   # table = df[0]
+   cities = geopandas.read_file(geopandas.datasets.get_path('naturalearth_cities'))
    world = geopandas.read_file(geopandas.datasets.get_path('naturalearth_lowres'))
    df.columns = df.columns.str.replace(' ', '')
   # df.astype(String)
-   table = world.merge(df, how="left", left_on=['name'], right_on=['Country'])
-
+   try:
+    table = world.merge(df, how="left", left_on=['name'], right_on=['Country'])
+  
+   except:
+    table = cities.merge(df, how="left", left_on=['name'], right_on=['City'])
+  
    table = table.dropna(subset=['Temperature'])
-   my_map = folium.Map(location=[19.433368, -99.137400],zoom_start=9)
+   my_map = folium.Map(location=[19.433368, -99.137400],zoom_start=3)
 # Add the data
    my_map = folium.Map()
 
@@ -139,14 +166,15 @@ def forecaste(request):
     fill_color='OrRd',
     fill_opacity=0.7,
     line_opacity=0.2,
-    legend_name='Meat consumption in kg/person'
+    legend_name='Temperature based on countries',
+    legend_size=(100,-100)
    ).add_to(my_map)
-   my_map.save('meat.html')
+   my_map.save('weather_app/templates/map.html')
   
    print(df)
    print(table)
    print(my_map) 
-   
+  # print(world) 
 #    return render(request,'about.html',{
 #      'temperature':returns
 #    })
